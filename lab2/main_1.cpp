@@ -23,6 +23,8 @@ void print(int **matrix, int size) {
 }
 
 int main() {
+	//srand(time(0));
+
 	int N = 11;
 		
 	int **matrix = makeRandMatrix(N, 123);
