@@ -3,12 +3,9 @@
 
 #include <iostream>
 
-#define MAXX 600
-#define MAXY 600
-
 #include "tFigure.hpp"
-/*
-tPoint* getArray(int N) {
+
+tPoint* getArrayPoint(int N) {
 	tPoint *array = new tPoint[N];
 	int randX, randY;
 	for (int i = 0; i < N; ++i) {
@@ -19,16 +16,25 @@ tPoint* getArray(int N) {
 	return array;
 }
 
+tCircle* getArrayCircle(int N) {
+	tCircle *array = new tCircle[N];
+	int randX, randY;
+	for (int i = 0; i < N; ++i) {
+		randX = rand() % MAXX;
+		randY = rand() % MAXY;
+		array[i] = tCircle(randX, randY);
+	}
+	return array;
+}
+
 void run() {
 	sf::RenderWindow window(sf::VideoMode(MAXX,MAXY), "Lab3");
 	
 	int N = 100;
-	tPoint *arrayPoint = getArray(N);
-
-	int *motion = new int[N];
-	for (int i = 0; i < N; ++i) {
-		motion[i] = 1;
-	}
+	
+	//tPoint *array = getArrayPoint(N);
+	//tCircle *array = getArrayCircle(N);
+	tCircle *array = getArrayCircle(N);
 
 	while(window.isOpen()) {
 		sf::Event event;
@@ -40,39 +46,29 @@ void run() {
 
 		window.clear();
 		
-		tPoint p;
 		for (int i = 0; i < N; ++i) {
-			p = arrayPoint[i];
-			sf::CircleShape shape(2.f);
-			shape.setFillColor(sf::Color(p.getColorR(),
-									p.getColorG(), p.getColorB()));
-			shape.setPosition(p.getX(), p.getY());
-			window.draw(shape);
+			window.draw(array[i].getShape());
 		}
 
 		#ifdef BROWN
 		for (int i = 0; i < N; ++i) {
-			arrayPoint[i].moveRandom();
+			array[i].moveRandom();
 		}
 		#else
 		for (int i = 0; i < N; ++i) {
-			arrayPoint[i].moveLinear();
+			array[i].moveLinear();
 		}
 		#endif
 
 		window.display();
 	}
 
-	delete[] arrayPoint;
+	delete[] array;
 }
-*/
-
-#include "tPoint.hpp"
 
 int main() {
 
-	tPoint fig (1, 2);
-	fig.print();
+	run();
 
 	return 0;
 }
