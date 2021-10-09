@@ -35,6 +35,8 @@ public:
 	int getY();
 
 	void setSize(int width, int height);
+	void setW(int);
+	void setH(int);
 	int getW();
 	int getH();
 
@@ -63,6 +65,18 @@ public:
 
 	void setRadius(int radius);
 	int getRadius();
+};
+
+class tEllipse : public tCircle
+{
+public:
+	tEllipse();
+	tEllipse(int x, int y, int radius=4, int radius2=8);
+
+	void setRadius2(int radius);
+	int getRadius2();
+
+	sf::CircleShape getShape();
 };
 
 

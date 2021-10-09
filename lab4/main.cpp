@@ -27,6 +27,21 @@ tCircle* getArrayCircle(int N) {
 	return array;
 }
 
+tEllipse* getArrayEllipse(int N) {
+	tEllipse *array = new tEllipse[N];
+	int randX, randY;
+	int radius, radius2;
+	for (int i = 0; i < N; ++i) {
+		randX = rand() % (MAXX-10);
+		randY = rand() % (MAXY-10);
+		radius = rand() % 3 + 2;
+		radius2 = rand() % 3 + 2;
+		array[i] = tEllipse(randX, randY, radius, radius2);
+	}
+	return array;
+}
+
+
 void run() {
 	sf::RenderWindow window(sf::VideoMode(MAXX,MAXY), "Lab3");
 	
@@ -34,7 +49,7 @@ void run() {
 	
 	//tPoint *array = getArrayPoint(N);
 	//tCircle *array = getArrayCircle(N);
-	tCircle *array = getArrayCircle(N);
+	tEllipse *array = getArrayEllipse(N);
 
 	while(window.isOpen()) {
 		sf::Event event;

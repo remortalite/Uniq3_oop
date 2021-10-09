@@ -62,6 +62,14 @@ void tFigure::setSize(int width, int height) {
 	m_width = width;
 }
 
+void tFigure::setW(int size) {
+	m_width = size;
+}
+
+void tFigure::setH(int size) {
+	m_height = size;
+}
+
 void tFigure::moveLinear() {
 	if (m_x-m_width < 0 || m_x+m_width > MAXX)
 		m_motion *= -1;
@@ -126,4 +134,30 @@ void tCircle::setRadius(int radius) {
 
 int tCircle::getRadius() {
 	return getW() / 2;
+}
+
+//------ tEllipse ------
+tEllipse::tEllipse()
+	: tCircle()
+{
+}
+
+tEllipse::tEllipse(int x, int y, int r, int r2)
+	: tCircle(x, y, r)
+{
+	setW(r2);
+}
+
+void tEllipse::setRadius2(int r) {
+	setW(r);
+}
+
+int tEllipse::getRadius2() {
+	return getW();
+}
+
+sf::CircleShape tEllipse::getShape() {
+	sf::CircleShape shape = tCircle::getShape();
+	shape.scale(getW(), getH());
+	return shape;
 }
