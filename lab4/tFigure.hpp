@@ -20,6 +20,8 @@ class tFigure {
 	// set 1 or -1
 	int m_motion = rand() % 2 > 0.5 ? -1 : 1;
 
+	float m_rotation = rand() % 360;
+
 public:
 
 	tFigure();
@@ -45,7 +47,11 @@ public:
 	void moveLinear();
 	void moveRandom();
 
+	void setRotation(int rotation);
+
 	void print();
+
+	float rotate();
 };
 
 class tPoint : public tFigure
@@ -61,7 +67,7 @@ class tCircle : public tPoint
 {
 public:
 	tCircle();
-	tCircle(int x, int y, int radius=2);
+	tCircle(int x, int y, int radius=8);
 
 	void setRadius(int radius);
 	int getRadius();
@@ -77,6 +83,54 @@ public:
 	int getRadius2();
 
 	sf::CircleShape getShape();
+};
+
+class tTriangle : public tCircle
+{
+public:
+	tTriangle();
+	tTriangle(int x, int y, int size=7);
+
+	sf::CircleShape getShape();
+};
+
+class tRombus : public tEllipse
+{
+public:
+	tRombus();
+	tRombus(int x, int y, int size=7, int size2=15);
+
+	sf::ConvexShape getShape();
+};
+
+
+// rectangles
+
+class tRectangle : public tFigure
+{
+public:
+	tRectangle();
+	tRectangle(int x, int y);
+	tRectangle(int x, int y, int a, int b);
+
+	void setSize(int a=3, int b=6);
+
+	sf::RectangleShape getShape();
+};
+
+class tSquare : public tRectangle
+{
+public:
+	tSquare();
+	tSquare(int x, int y);
+	tSquare(int x, int y, int size=7);
+};
+
+class tLine : public tRectangle
+{
+public:
+	tLine();
+	tLine(int x, int y, int size=7);
 };
 
 
