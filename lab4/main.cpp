@@ -114,6 +114,8 @@ tLine* getArrayLine(int N) {
 
 void run() {
 	sf::RenderWindow window(sf::VideoMode(MAXX,MAXY), "Lab3");
+
+	srand(time(0));
 	
 	int N = 100;
 	
