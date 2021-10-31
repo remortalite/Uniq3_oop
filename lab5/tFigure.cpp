@@ -114,7 +114,7 @@ void tFigure::setRotation(int rotation) {
 
 void tFigure::makeRotation() {
 	if (m_rotation >= 360) m_rotation = 0;
-	else m_rotation += 0.06;
+	else m_rotation += 0.1;
 }
 
 sf::Vector2f tFigure::rotate(sf::Vector2f vector) {
@@ -161,7 +161,7 @@ tCircle::tCircle(int x, int y, int radius)
 }
 
 void tCircle::setRadius(int radius) {
-	setSize(radius*2, radius*2);
+	setSize(radius, radius);
 }
 
 int tCircle::getRadius() {
@@ -170,10 +170,10 @@ int tCircle::getRadius() {
 
 sf::VertexArray tCircle::getShape() {
 
-		sf::Transform rotation;
-		rotation.rotate(10.0f);
+		//sf::Transform rotation;
+		//rotation.rotate(10.0f);
 
-		sf::Transform transform = rotation.rotate(0.1f);
+		//sf::Transform transform = rotation.rotate(0.1f);
 	
 	int k = 128;
 	sf::VertexArray shape (sf::TriangleFan, k);
@@ -186,9 +186,9 @@ sf::VertexArray tCircle::getShape() {
 		shape[k-1-i].color = sf::Color(getColorR() ,getColorG(), getColorB());
 		shape[k-1-i].position = sf::Vector2f(getX() + getW()/2*std::cos(i*2*PI/k), 
 										getY() - getH()/2*std::sin(i*2*PI/k));
-		shape[k-1-i].position = rotate(shape[i].position);
+		shape[k-1-i].position = rotate(shape[k-1-i].position);
 	}
-	//makeRotation();
+	makeRotation();
 	//shape.setPosition(getX(), getY());
 	//shape.setRotation(rotate());
 	return shape;
@@ -245,8 +245,6 @@ sf::VertexArray tTriangle::getShape() {
 		return shape;
 }
 
-
-/*
 //------ tRectangle ------
 
 tRectangle::tRectangle()
@@ -271,37 +269,57 @@ void tRectangle::setSize(int a, int b)
 	setW(b);
 }
 
-sf::RectangleShape tRectangle::getShape() {
-	sf::RectangleShape shape (sf::Vector2f((float)getW(), (float)getH()));
-	shape.setFillColor(sf::Color(getColorR(), getColorG(), getColorB()));
-	shape.setPosition(getX(), getY());
-		shape.setRotation(rotate());
+sf::VertexArray tRectangle::getShape() {
+
+		makeRotation();
+
+		sf::VertexArray shape (sf::Quads, 4);
+		shape[0].color = sf::Color(getColorR()/3, getColorG(), getColorB());
+		shape[0].position = rotate(sf::Vector2f(getX()-getW()/2, getY()-getH()/2));
+
+		shape[1].color = sf::Color(getColorR(), getColorG()/3, getColorB());
+		shape[1].position = rotate(sf::Vector2f(getX()-getW()/2, getY()+getH()/2));
+
+		shape[2].color = sf::Color(getColorR(), getColorG(), getColorB()/3);
+		shape[2].position = rotate(sf::Vector2f(getX()+getW()/2, getY()+getH()/2));
+
+		shape[3].color = sf::Color(getColorR(), getColorG(), getColorB()/3);
+		shape[3].position = rotate(sf::Vector2f(getX()+getW()/2, getY()-getH()/2));
+
 	return shape;
 }
-*/
-/*
+
 //------ tRombus ------
 
 tRombus::tRombus()
-	: tEllipse()
+	: tRectangle()
 {
 }
 
 tRombus::tRombus(int x, int y, int size, int size2)
-	: tEllipse(x, y, size, size2)
+	: tRectangle(x, y, size, size2)
 {
 }
 
-sf::CircleShape tRombus::getShape() {
-		sf::CircleShape shape (2.f, 4);
-		shape.scale(getRadius()/getRadius(), getRadius2()*1.0/getRadius());
+sf::VertexArray tRombus::getShape() {
 
-		shape.setFillColor(sf::Color(getColorR(), getColorG(), getColorB()));
-		shape.setPosition(getX(), getY());
-		shape.setRotation(rotate());
+		makeRotation();
+
+		sf::VertexArray shape (sf::Quads, 4);
+		shape[0].color = sf::Color(getColorR()/3, getColorG(), getColorB());
+		shape[0].position = rotate(sf::Vector2f(getX(), getY()-getH()/2));
+
+		shape[1].color = sf::Color(getColorR(), getColorG()/3, getColorB());
+		shape[1].position = rotate(sf::Vector2f(getX()-getW()/2, getY()));
+
+		shape[2].color = sf::Color(getColorR(), getColorG(), getColorB()/3);
+		shape[2].position = rotate(sf::Vector2f(getX(), getY()+getH()/2));
+
+		shape[3].color = sf::Color(getColorR(), getColorG(), getColorB()/3);
+		shape[3].position = rotate(sf::Vector2f(getX()+getW()/2, getY()));
+
 		return shape;
 }
-
 
 //------ tSquare ------
 
@@ -313,6 +331,7 @@ tSquare::tSquare()
 tSquare::tSquare(int x, int y)
 	: tRectangle(x, y)
 {
+	setSize(17, 17);
 }
 
 tSquare::tSquare(int x, int y, int size)
@@ -333,4 +352,3 @@ tLine::tLine(int x, int y, int size)
 	setH(size);
 	setW(2);
 }
-*/

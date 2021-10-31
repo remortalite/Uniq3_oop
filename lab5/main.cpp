@@ -58,7 +58,6 @@ tTriangle* getArrayTriangle(int N) {
 	return array;
 }
 
-/*
 tRectangle* getArrayRectangle(int N) {
 	tRectangle *array = new tRectangle[N];
 	int randX, randY;
@@ -66,8 +65,8 @@ tRectangle* getArrayRectangle(int N) {
 	for (int i = 0; i < N; ++i) {
 		randX = getrandcoord();
 		randY = getrandcoord();
-		a = rand() % 5 * 2 + 4;
-		b = rand() % 5 * 2 + 4;
+		a = rand() % 5 * 4 + 4;
+		b = rand() % 5 * 4 + 4;
 		array[i] = tRectangle(randX, randY, a, b);
 	}
 	return array;
@@ -85,6 +84,7 @@ tSquare* getArraySquare(int N) {
 	}
 	return array;
 }
+
 tRombus* getArrayRombus(int N) {
 	tRombus *array = new tRombus[N];
 	int randX, randY;
@@ -112,23 +112,56 @@ tLine* getArrayLine(int N) {
 	}
 	return array;
 }
-*/
+
+tFigure** getArray(int N) {
+	tFigure **array = new tFigure*[N];
+	int randX, randY, a, b;
+
+	for (int i = 0; i < N; ++i) {
+		randX = getrandcoord();
+		randY = getrandcoord();
+		a = rand() % 8 * 4 + 4;
+		b = rand() % 8 * 4 + 4;
+		switch(rand()%8) {
+			case 0:
+				array[i] = new tPoint(randX, randY);
+				break;
+			case 1:
+				array[i] = new tCircle(randX, randY, a);
+				break;
+			case 2:
+				array[i] = new tEllipse(randX, randY, a, b);
+				break;
+			case 3:
+				array[i] = new tTriangle(randX, randY, a);
+				break;
+			case 4:
+				array[i] = new tRectangle(randX, randY, a, b);
+				break;
+			case 5:
+				array[i] = new tSquare(randX, randY, a);
+				break;
+			case 6:
+				array[i] = new tRombus(randX, randY, a, b);
+				break;
+			case 7:
+				array[i] = new tLine(randX, randY, a);
+				break;
+		}
+	}
+
+	return array;
+}
+
 void run() {
-	sf::RenderWindow window(sf::VideoMode(MAXX,MAXY), "Lab3");
+	sf::RenderWindow window(sf::VideoMode(MAXX,MAXY), "Lab5");
 
 	srand(time(0));
 	
 	int N = 100;
 	
-	//tPoint *array = getArrayPoint(N);
-	//tCircle *array = getArrayCircle(N);
-	//tEllipse *array = getArrayEllipse(N);
-	tTriangle *array = getArrayTriangle(N);
-	//tRectangle *array = getArrayRectangle(N);
-	//tSquare *array = getArraySquare(N);
-	//tRombus *array = getArrayRombus(N);
-	//tLine *array = getArrayLine(N);
-	
+	tFigure **array = getArray(N);
+
 	while(window.isOpen()) {
 		sf::Event event;
 		while(window.pollEvent(event)) {
@@ -140,16 +173,16 @@ void run() {
 		window.clear();
 		
 		for (int i = 0; i < N; ++i) {
-			window.draw(array[i].getShape());
+			window.draw(array[i]->getShape());
 		}
 
 		#ifdef BROWN
 		for (int i = 0; i < N; ++i) {
-			array[i].moveRandom();
+			array[i]->moveRandom();
 		}
 		#else
 		for (int i = 0; i < N; ++i) {
-			array[i].moveLinear();
+			array[i]->moveLinear();
 		}
 		#endif
 

@@ -88,8 +88,6 @@ public:
 
 	void setRadius2(int radius);
 	int getRadius2();
-
-	//virtual sf::CircleShape getShape();
 };
 
 class tTriangle : public tFigure
@@ -100,18 +98,7 @@ public:
 
 	virtual sf::VertexArray getShape();
 };
-
-/*
-class tRombus : public tEllipse
-{
-public:
-	tRombus();
-	tRombus(int x, int y, int size=7, int size2=15);
-
-	virtual sf::CircleShape getShape();
-};
 // rectangles
-
 class tRectangle : public tFigure
 {
 public:
@@ -119,17 +106,27 @@ public:
 	tRectangle(int x, int y);
 	tRectangle(int x, int y, int a, int b);
 
-	void setSize(int a=3, int b=6);
+	void setSize(int a=6, int b=16);
 
-	virtual sf::RectangleShape getShape();
+	virtual sf::VertexArray getShape();
 };
+
+class tRombus : public tRectangle
+{
+public:
+	tRombus();
+	tRombus(int x, int y, int size=7, int size2=15);
+
+	virtual sf::VertexArray getShape();
+};
+
 
 class tSquare : public tRectangle
 {
 public:
 	tSquare();
 	tSquare(int x, int y);
-	tSquare(int x, int y, int size=7);
+	tSquare(int x, int y, int size);
 };
 
 class tLine : public tRectangle
@@ -138,6 +135,5 @@ public:
 	tLine();
 	tLine(int x, int y, int size=7);
 };
-*/
 
 #endif // #ifndef FIGURES_HPP
