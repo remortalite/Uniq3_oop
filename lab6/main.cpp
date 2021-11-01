@@ -24,6 +24,7 @@ int main() {
 	list2.getId();
 	list3.getId();
 
+	std::cout << "\nStack: " << std::endl;
 	Stack stack {1};
 
 	stack.print();
@@ -42,6 +43,33 @@ int main() {
 	catch (ListException &e)
 	{
 		std::cerr << "Error! " << e.what() << std::endl;
+	}
+
+	std::cout << "\nQue: " << std::endl;
+	Que que {1, 3, 5, 7, 9};
+
+	que.print();
+	que.pop();
+	que.print();
+	que.push(-1);
+	que.print();
+	que.pop();
+	que.print();
+	que.pop();
+	que.print();
+	que.pop();
+	que.print();
+	que.pop();
+	que.print();
+	que.pop();
+	que.print();
+
+	try {
+		que.pop();
+	}
+	catch (ListException &e)
+	{
+		std::cerr << "Error!: " << e.what() << "\n";
 	}
 
 	return 0;

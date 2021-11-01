@@ -23,6 +23,10 @@ Node* List::getLast() {
         return p;
 }
 
+Node* List::getFirst() {
+	return m_head;
+}
+
 List::List() {
         m_head = nullptr;
         m_id = s_nextId++;
@@ -49,12 +53,15 @@ int List::getId() {
         return m_id;
 }
 
-void List::add(int data) {
+Node* List::add(int data) {
         Node* last = getLast();
-        if (last)
+        if (last) {
                 last->next = createNode(data);
-        else
+		return last->next;
+	} else {
                 m_head = createNode(data);
+		return m_head;
+	}
 }
 
 void List::remove() {
@@ -109,6 +116,33 @@ int Stack::pop() {
 		return data;
 	} else {
 		throw ListException("No elements in stack!");
+	}
+}
+
+Que::Que()
+	: Stack(), m_tail(nullptr)
+{
+}
+
+Que::Que(const std::initializer_list<int> &list)
+	: Stack(list), m_tail(nullptr)
+{
+}
+
+void Que::push(int data) {
+	m_tail = Stack::add(data);
+}
+
+int Que::pop() {
+	int data;
+	Node* p = getFirst();
+	if (p) {
+		data = p->data;
+		m_head = p->next;
+		delete p;
+		return data;
+	} else {
+		throw ListException("No elements in que!");
 	}
 }
 

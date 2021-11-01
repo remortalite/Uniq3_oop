@@ -24,10 +24,11 @@ class List
         static int s_nextId;
         int m_id;
 
-        Node* m_head;
 
         Node* createNode(int data);
 
+protected:
+        Node* m_head;
 
 public:
 
@@ -37,12 +38,13 @@ public:
 
 	int getId();
 
-	void add(int data);
+	Node* add(int data);
 	void remove();
 
 	void print();
 
 	Node* getLast();
+	Node* getFirst();
 };
 
 class Stack: public List
@@ -56,7 +58,19 @@ public:
 	int pop();
 };
 
+class Que: public Stack
+{
 
+protected:
+	Node* m_tail;
+
+public:
+	Que();
+	Que(const std::initializer_list<int> &);
+
+	void push(int);
+	int pop();
+};
 
 
 #endif // #ifndef LIST_HPP	
