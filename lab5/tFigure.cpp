@@ -82,7 +82,7 @@ void tFigure::setH(int size) {
 }
 
 void tFigure::moveLinear() {
-	if (m_x-1 < 0 || m_x+m_width+1 >= MAXX)
+	if (m_x-1 < 0 || m_x+m_width >= MAXX)
 		m_motion *= -1;
 	move(m_motion, 0);
 }

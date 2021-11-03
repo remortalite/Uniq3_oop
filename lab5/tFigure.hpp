@@ -98,6 +98,7 @@ public:
 
 	virtual sf::VertexArray getShape();
 };
+
 // rectangles
 class tRectangle : public tFigure
 {

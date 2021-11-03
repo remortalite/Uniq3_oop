@@ -4,11 +4,10 @@
 #include <string>
 
 int main() {
-	List list;
-	list.add(4);
-	list.print();
 
 	List list2 {1, 2, 3, 4, 5, 6};
+	list2.print();
+	list2.add(-1);
 	list2.print();
 
 	List list3;
@@ -20,7 +19,6 @@ int main() {
 		std::cerr << "Error!: " << e.what() << "\n";
 	}
 
-	list.getId();
 	list2.getId();
 	list3.getId();
 
@@ -49,9 +47,13 @@ int main() {
 	Que que {1, 3, 5, 7, 9};
 
 	que.print();
+	que.push(-1);
+	que.print();
+	que.push(-2);
+	que.print();
 	que.pop();
 	que.print();
-	que.push(-1);
+	que.pop();
 	que.print();
 	que.pop();
 	que.print();
