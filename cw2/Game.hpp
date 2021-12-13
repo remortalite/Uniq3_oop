@@ -2,82 +2,86 @@
 #define GAME_HPP
 
 #include "Creature.hpp"
+#include "Hunter.hpp"
+#include "LivingCreature.hpp"
+#include "Plant.hpp"
+#include "Prey.hpp"
 
-class Game
-{
+#include <SFML/Graphics.hpp>
 
-        int m_Xsize;
-        int m_Ysize;
+#include <iostream>
+#include <random>
 
-        const char* m_gameTitle = "Game of life";
+class Game {
+    int m_Xsize;
+    int m_Ysize;
 
-        sf::RenderWindow m_window;
+    const char* m_gameTitle = "Game of life";
 
-        int m_Nrow = 10; // square count per column or row
+    sf::RenderWindow m_window;
 
-        int m_borderSize = 2;
+    int m_Nrow = 10; // square count per column or row
 
-        int m_squareSize;
+    int m_borderSize = 2;
 
-        typedef Creature** CreatureArray;
+    int m_squareSize;
 
-        int m_sizeArrayCreatures = 10;
-        int m_countCreatures = 0;
+    typedef Creature** CreatureArray;
 
-        CreatureArray* m_board;
+    int m_sizeArrayCreatures = 20;
+    int m_countCreatures = 0;
 
-        int m_steps = 0;
+    CreatureArray* m_board;
 
-        // probabilities
+    int m_steps = 0;
 
-        int m_probSizeArray;
-        int* m_probArray;
+    // probabilities
 
-        typedef enum CreatureInt {
-                CreatureInt_Hunter = 1,
-                CreatureInt_Prey = 2,
-                CreatureInt_Plant = 3
-        } CreatureInt;
+    int m_probSizeArray;
+    int* m_probArray;
 
-	void fillProbArray();
+    typedef enum CreatureInt {
+        CreatureInt_Hunter = 1,
+        CreatureInt_Prey = 2,
+        CreatureInt_Plant = 3
+    } CreatureInt;
 
-	CreatureType chooseRandomCreatureType();
+    void fillProbArray();
+
+    CreatureType chooseRandomCreatureType();
 
 public:
+    Game(int Xsize, int Ysize);
 
-	Game(int Xsize, int Ysize);
+    Game(int Xsize);
 
-	Game(int Xsize);
+    Game();
 
-	Game();
+    sf::Vector2f getCoord(int, int);
 
-	sf::Vector2f getCoord(int, int);
+    sf::RectangleShape createShape(Creature* creature);
 
-	sf::RectangleShape createShape(Creature* creature);
+    int isIndexAvailable(int x, int y);
 
-	int isIndexAvailable(int x, int y);
+    int isSideIndexAvailable();
 
-	int isSideIndexAvailable();
+    int isBoardFull();
 
-	int isBoardFull();
+    Creature* getCreature(CreatureType type, int onSide = 0);
 
-	Creature* getCreature(CreatureType type, int onSide = 0);
+    Creature* getRandomCreature();
 
-        Creature* getRandomCreature();
+    void initializeArray();
 
-        void initializeArray();
+    void updateEnvironment();
 
-        void updateEnvironment();
+    void lifeStep();
 
-        void lifeStep();
+    int countHunters();
 
-        int countHunters();
+    int countPreys();
 
-        int countPreys();
-
-	void run();
-
+    void run();
 };
 
-
-#endif // #ifndef GAME_HPP	
+#endif // #ifndef GAME_HPP

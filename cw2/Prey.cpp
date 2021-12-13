@@ -1,25 +1,23 @@
 #include "Prey.hpp"
 #include "LivingCreature.hpp"
 
-Prey::Prey(int x, int y)
-	: LivingCreature(x, y)
+Prey::Prey(int x, int y) : LivingCreature(x, y)
 {
-	setColor(sf::Color::Yellow);
-	setProb(0.4f);
+    setColor(sf::Color::Yellow);
+    setProb(0.4f);
 }
 
-
-CreatureType Prey::getType() {
-	return CreatureType::Prey;
+CreatureType Prey::getType()
+{
+    return CreatureType::Prey;
 }
 
-
-char* Prey::getTypeName() {
-	return "Prey";
+const char* Prey::getTypeName()
+{
+    return "Prey";
 }
 
-int Prey::getSpeed() {
-	return 1;
+int Prey::getSpeed()
+{
+    return 1;
 }
-
-

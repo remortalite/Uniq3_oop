@@ -6,25 +6,22 @@
 #include <SFML/Graphics.hpp>
 
 class Plant : public Creature {
-
-	int m_lifetime = 6;
+    int m_lifetime = 6;
 
 public:
+    Plant(int, int);
 
-	Plant(int, int);
+    virtual CreatureType getType();
 
-	virtual CreatureType getType();
+    virtual const char* getTypeName();
 
-	virtual char* getTypeName();
+    int getLifetime();
 
-	int getLifetime();
+    virtual void step();
 
-	virtual void step();
+    virtual int isDead();
 
-	virtual int isDead();
-
-	virtual int getSpeed(); // -> 0
-
+    virtual int getSpeed(); // -> 0
 };
 
-#endif // #ifndef PLANT_HPP	
+#endif // #ifndef PLANT_HPP

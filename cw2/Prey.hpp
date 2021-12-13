@@ -3,20 +3,15 @@
 
 #include "LivingCreature.hpp"
 
-class Prey : public LivingCreature
-{
-
+class Prey : public LivingCreature {
 public:
+    Prey(int x, int y);
 
-        Prey(int x, int y);
+    virtual CreatureType getType();
 
-        virtual CreatureType getType();
+    virtual const char* getTypeName();
 
-        virtual char* getTypeName();
-
-        virtual int getSpeed(); //-> 1
-
+    virtual int getSpeed(); //-> 1
 };
 
-
-#endif // #ifndef PREY_HPP	
+#endif // #ifndef PREY_HPP

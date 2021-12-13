@@ -5,32 +5,27 @@
 
 #include <SFML/Graphics.hpp>
 
-class LivingCreature : public Creature
-{
-
+class LivingCreature : public Creature {
 public:
+    int m_hunger = 15;
+    int m_eaten = 0;
+    const int m_hungerStep = -2;
+    const int m_gaveBirthStep = -4;
+    const int m_eatStep = 2;
 
-        int m_hunger = 15;
-        int m_eaten = 0;
-        const int m_hungerStep = -2;
-        const int m_gaveBirthStep = -4;
-        const int m_eatStep = 2;
+    uint8_t delta = 20;
 
-        uint8_t delta = 20;
+    LivingCreature(int x, int y);
 
-        LivingCreature(int x, int y);
+    void step();
 
-	void step();
+    virtual int isDead();
 
-	virtual int isDead();
+    void eat();
 
-	void eat();
+    void giveBirth();
 
-	void giveBirth();
-
-	int getCountEaten();
-
+    int getCountEaten();
 };
 
-
-#endif // #ifndef LIVINGCREATURE_HPP	
+#endif // #ifndef LIVINGCREATURE_HPP
