@@ -2,13 +2,12 @@
 #include <SFML/Graphics.hpp>
 
 #include <iostream>
+#include <random>
+#include <ctime>
 
-#include "tFigure.hpp"
+//#include "tFigure.hpp"
 
-
-int getrandcoord() {
-	return rand() % (MAXX-30);
-}
+enum class CreatureType { Hunter, Prey, Plant };
 
 class Creature {
 
@@ -20,7 +19,16 @@ private:
 
 	float m_probability;
 
+protected:
+
+	const int m_period = 6;
+	int m_phase = 0;
+
 public:
+	
+	virtual CreatureType getType() {
+	}
+
 	Creature(int x, int y) 
 		: m_idxX(x), m_idxY(y) 
 	{
@@ -63,12 +71,45 @@ public:
 		m_probability = prob;
 	}
 
+	virtual void step() {
+		stepPhase();
+	};
+
+	int getPeriod() {
+		return m_period;
+	}
+
+	int getPhase() {
+		return m_phase;
+	}
+
+	void stepPhase() {
+		++m_phase;
+		if (m_phase == m_period)
+			m_phase = 0;
+	}
+
+	virtual int isDead() {
+		return 0;
+	}
+
+	virtual int getSpeed() {
+		return 1;
+	}
+
 };
 
 class Plant : public Creature
 {
 
+	int m_lifetime = 6;
+
 public:
+
+	virtual CreatureType getType() {
+		return CreatureType::Plant;
+	}
+
 	Plant(int x, int y)
 		: Creature(x, y)
 	{
@@ -76,35 +117,143 @@ public:
 		setProb(0.6f);
 	}
 
+	int getLifetime() {
+		return m_lifetime;
+	}
+
+	virtual void step()
+	{
+		Creature::step();
+		--m_lifetime;
+	}
+
+	virtual int isDead() {
+		if (m_lifetime == 0)
+			return 1;
+		return 0;
+	}
+
+	virtual int getSpeed() {
+		return 0;
+	}
+
 };
 
-class Prey : public Creature
+uint8_t diffColor = 20;
+
+uint8_t incColor(uint8_t color, uint8_t delta) {
+	if (color + delta > 255-delta)
+		return color;
+	return color+delta;
+}
+
+uint8_t decColor(uint8_t color, uint8_t delta) {
+	if (color - delta < delta)
+		return color;
+	return color+delta;
+}
+
+class LivingCreature : public Creature
 {
-	
+
 public:
-	Prey(int x, int y)
+
+	int m_hunger = 15;
+	const int m_hungerStep = -2;
+	const int m_gaveBirthStep = -4;
+	const int m_eatStep = 2;
+
+	uint8_t delta = 10;
+
+	LivingCreature(int x, int y)
 		: Creature(x, y)
+	{
+	}
+
+	virtual void step() {
+		Creature::step();
+
+		sf::Color color = getColor();
+		std::cout << "stepColor: " << (int)color.r << ", " << (int)color.b << ", " << (int)color.g << std::endl;
+		if (color.a-delta >= delta)
+			setColor(sf::Color(color.r, color.g, color.b, color.a-delta));
+	};
+
+	virtual int isDead() {
+		if (m_hunger <= 0)
+			return 1;
+		return 0;
+	}
+
+	void eat() {
+		m_hunger += m_eatStep;
+		++m_eaten;
+		
+		sf::Color color = getColor();
+		if (color.a+delta >= 254)
+			setColor(sf::Color(color.r, color.g, color.b, color.a+delta));
+	}
+
+	void giveBirth() {
+		hunger += m_gaveBirthStep;
+	}
+
+	void makeMovement(int newX, int newY) {
+		if ((newX - getX() != 0) || (newY - getY != 0))
+			m_hunger += m_hungerStep;
+
+		setPosition(newX, newY);
+	}
+
+	int getCountEaten() {
+		return m_eaten;
+	}
+};
+
+class Prey : public LivingCreature
+{
+
+public:
+
+	virtual CreatureType getType() {
+		return CreatureType::Prey;
+	}
+
+	Prey(int x, int y)
+		: LivingCreature(x, y)
 	{
 		setColor(sf::Color::Yellow);
 		setProb(0.4f);
 	}
 
+	virtual int getSpeed() {
+		return 1;
+	}
+
 };
 
-class Hunter : public Creature
+class Hunter : public LivingCreature
 {
-	
+
 public:
+
+	virtual CreatureType getType() {
+		return CreatureType::Hunter;
+	}
+
 	Hunter(int x, int y)
-		: Creature(x, y)
+		: LivingCreature(x, y)
 	{
 		setColor(sf::Color::Red);
 		setProb(0.1f);
 	}
 
+	virtual int getSpeed() {
+		if (m_hunger <= 5)
+			return 2;
+		return 1;
+	}
 };
-
-
 
 class Game
 {
@@ -123,14 +272,13 @@ class Game
 	int m_squareSize;
 
 	typedef Creature** CreatureArray;
-	enum class CreatureType { Hunter, Prey, Plant };
 
-	int m_sizeArrayCreatures = 10;
+	int m_sizeArrayCreatures = 100;
 	int m_countCreatures = 0;
 
-	CreatureArray m_creatures = new Creature*[m_sizeArrayCreatures];
-
 	CreatureArray* m_board;
+
+	int m_steps = 0;
 
 	// probabilities
 	
@@ -168,6 +316,7 @@ class Game
 			case CreatureInt_Plant:  return CreatureType::Plant;
 			default: std::cerr << "Errrr choose (" << m_probArray[randIdx] << ") ! That not supposed to happen!" << std::endl;
 		}
+		return CreatureType::Plant;
 	}
 	
 	
@@ -212,24 +361,49 @@ public:
 	}
 
 	int isIndexAvailable(int x, int y) {
-		for (int i = 0; i < m_countCreatures; ++i) {
-			if (m_creatures[i]->getX() == x &&
-					m_creatures[i]->getY() == y )
-				return 0;
-		}
+		if (m_board[x][y] == nullptr)
+			return 1;
+		return 0;
+	}
+
+	int isSideIndexAvailable() {
+		for (int i = 0; i < m_Nrow; ++i)
+			if (m_board[i][0] == nullptr || m_board[i][m_Nrow-1] == nullptr)
+				return 1;
+		for (int j = 0; j < m_Nrow; ++j)
+			if (m_board[0][j] == nullptr || m_board[m_Nrow-1][j] == nullptr)
+				return 1;
+		return 0;
+	}
+
+	int isBoardFull() {
+		for (int i = 0; i < m_Nrow; ++i)
+			for (int j = 0; j < m_Nrow; ++j)
+				if (m_board[i][j] == nullptr)
+					return 0;
 		return 1;
 	}
 
 
-	Creature* getCreature(CreatureType type) {
+	Creature* getCreature(CreatureType type, int onSide = 0) {
 		int randX, randY;
-		if (m_countCreatures+1 > m_Nrow*m_Nrow) {
+		if (m_countCreatures+1 > m_Nrow*m_Nrow || isBoardFull() == 1) {
 			std::cerr << "No available cell!" << std::endl;
 			return nullptr;
 		}
-		do { 
+		if (onSide == 1) {
+			if (isSideIndexAvailable() == 0) {
+				return nullptr;
+			}
+		}
+		do {
 			randX = rand() % m_Nrow;
 			randY = rand() % m_Nrow;
+			if (onSide) {
+				int onSideCoef = rand() % 2;
+				randX *= onSideCoef;
+				randY *= !onSideCoef;
+			}
 		} while (isIndexAvailable(randX, randY) == 0);
 
 		switch(type) {
@@ -239,6 +413,7 @@ public:
 			default: std::cerr << "Errrr get! That not supposed to happen!" << std::endl;
 				break;
 		}
+		return nullptr;
 	}
 
 	Creature* getRandomCreature() {
@@ -248,23 +423,114 @@ public:
 			case CreatureType::Plant: return getCreature(CreatureType::Plant); 
 			default: std::cerr << "Errrr! That not supposed to happen!" << std::endl;
 		}
+		return nullptr;
 	}
 
-	CreatureArray initializeArray() {
+	void initializeArray() {
 		fillProbArray();
 		for (int i = 0; i < m_sizeArrayCreatures; ++i) {
 			Creature* creature = getRandomCreature();
 
 			if (creature == nullptr) break;
 
-			m_creatures[i] = creature;
 			m_board[creature->getX()][creature->getY()] = creature;
 			++m_countCreatures;
 		}
 	}
 
 	void lifeStep() {
-		
+		int dx, dy;
+		for (int i = 0; i < m_Nrow; ++i) {
+			for (int j = 0; j < m_Nrow; ++j) {
+				Creature* creature = m_board[i][j];
+				if (!creature) continue;
+				creature->step();
+				if (creature->isDead()) {
+					m_board[i][j] = nullptr;
+					--m_countCreatures;
+					continue;
+				}
+
+				int speed = creature->getSpeed();
+				if (speed == 1) {
+					dx = rand() % 3 - 1;
+					dy = rand() % 3 - 1;
+				} else {
+					dx = rand() % 5 - 2;
+					dy = rand() % 5 - 2;
+				}
+
+				if (i+dx < 0 || i+dx >= m_Nrow) dx = 0;
+				if (j+dy < 0 || j+dy >= m_Nrow) dy = 0;
+				Creature* nextCell = m_board[i+dx][j+dy];
+				int isChild;
+				switch (creature->getType()) {
+					case CreatureType::Plant:
+						break;
+					case CreatureType::Prey:
+						isChild = rand() % 100 < 25 ? 1 : 0;
+						if (nextCell == nullptr) {
+							m_board[i+dx][j+dy] = m_board[i][j];
+							m_board[i][j] = isChild ? getCreature(CreatureType::Prey) : nullptr;
+						} else {
+							if (nextCell && nextCell->getType() == CreatureType::Plant) {
+								m_board[i][j]->setPosition(i+dx,j+dy);
+								Prey* creature = (Prey*)m_board[i][j];
+								creature->eat();
+								--m_countCreatures;
+								m_board[i+dx][j+dy] = m_board[i][j];
+								if (isChild) {
+									Creature* child = getCreature(CreatureType::Prey);
+									if (child) {
+										m_board[i][j] = child;
+										++m_countCreatures;
+									}
+								} else {
+									m_board[i][j] = nullptr;
+								}
+							}
+						}
+						break;
+					case CreatureType::Hunter:
+						if (nextCell == nullptr) {
+							m_board[i+dx][j+dy] = m_board[i][j];
+							m_board[i][j] = nullptr;
+						} else {
+							if (nextCell && nextCell->getType() == CreatureType::Prey) {
+								m_board[i][j]->setPosition(i+dx,j+dy);
+								Hunter* creature = (Hunter*)m_board[i][j];
+								creature->eat();
+								--m_countCreatures;
+								m_board[i+dx][j+dy] = m_board[i][j];
+								m_board[i][j] = nullptr;
+							}
+						}
+						break;
+
+					default: break;
+					
+				}
+				
+			}
+		}
+	}
+
+	int countHunters() {
+		int count = 0;
+		for (int i = 0; i < m_Nrow; ++i)
+			for (int j = 0; j < m_Nrow; ++j)
+				if (m_board[i][j] && m_board[i][j]->getType() == CreatureType::Hunter)
+					++count;
+		return count;
+	}
+
+	int countPreys() {
+		int count = 0;
+		for (int i = 0; i < m_Nrow; ++i)
+			for (int j = 0; j < m_Nrow; ++j)
+				if (m_board[i][j] && m_board[i][j]->getType() == CreatureType::Prey)
+					++count;
+		return count;
 	}
 
 	void run() {
@@ -274,14 +540,44 @@ public:
 				if (event.type == sf::Event::Closed || 
 					sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
 						m_window.close();
+				else if (event.type == sf::Event::KeyPressed &&
+						sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
+					lifeStep();
+					++m_steps;
+
+					if (m_steps % 5 == 0)
+						for (int i = 0; i < 15; ++i) {
+							Creature* creature = getCreature(CreatureType::Plant);
+							if (creature == nullptr) break;
+							m_board[creature->getX()][creature->getY()] = creature;
+							++m_countCreatures;
+						}
+
+					if (countHunters() < 5) {
+						for (int i = 0; i < 5; ++i) {
+							Creature* creature = getCreature(CreatureType::Hunter, 1);
+							if (creature == nullptr) break;
+							else m_board[creature->getX()][creature->getY()] = creature;
+							++m_countCreatures;
+						}
+					}
+
+				
+					if (countPreys() < 2) {
+						for (int i = 0; i < 2; ++i) {
+							Creature* creature = getCreature(CreatureType::Prey, 1);
+							if (creature == nullptr) break;
+							else m_board[creature->getX()][creature->getY()] = creature;
+							++m_countCreatures;
+						}
+		
+					}
+				}
 			}
 
+			//std::cout << "Side: " << isSideIndexAvailable() << std::endl;
 			m_window.clear(sf::Color::Black);
 
-			//for (int i = 0; i < m_countCreatures; ++i) {
-			//	m_window.draw(createShape(m_creatures[i]));
-			//}
-			
 			for (int i = 0; i < m_Nrow; ++i) {
 				for (int j = 0; j < m_Nrow; ++j) {
 					Creature* creature = m_board[i][j];
@@ -290,7 +586,9 @@ public:
 				}
 			}
 
+
 			m_window.display();
+
 
 		}
 	}
@@ -303,87 +601,3 @@ int main() {
 	Game game;
 	game.run();
 }
-/*
-sf::RectangleShape** getArray(int Nrow, int Ncol) {
-
-	int randX, randY, a, b;
-	int N = Nrow*Ncol;
-
-	sf::RectangleShape **array = new sf::RectangleShape*[N];
-
-		float size = MAXX/10-BORDER;
-		window.draw(sf::RectangleShape(sf::Vector2f(size, size)));
-
-		sf::RectangleShape shape = sf::RectangleShape(sf::Vector2f(size, size));
-		shape.setPosition(sf::Vector2f(size+BORDER, 0));
-
-	for (int i = 0; i < N; ++i) {
-		randX = getrandcoord();
-		randY = getrandcoord();
-		a = rand() % 8 * 4 + 4;
-		b = rand() % 8 * 4 + 4;
-		array[i] = new sf::RectangleShape();
-		array[i]->setPosition(randX, randY);
-		array[i]->setScale(randX, randY);
-		array[i]->setFillColor(sf::Color::Red);
-	}
-
-	return array;
-}
-
-void run() {
-	sf::RenderWindow window(sf::VideoMode(MAXX,MAXY), "Lab5");
-
-	srand(time(0));
-	
-	int Nrow = 10;
-	int Ncol = 10;
-
-	int N = Nrow*Ncol;
-	
-	sf::RectangleShape **array = getArray(Nrow, Ncol);
-
-	while(window.isOpen()) {
-		sf::Event event;
-		while(window.pollEvent(event)) {
-			if (event.type == sf::Event::Closed || 
-				sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
-					window.close();
-		}
-
-		window.clear(sf::Color::Black);
-		
-		for (int i = 0; i < N; ++i) {
-			window.draw(*array[i]);
-		}
-
-		float size = MAXX/10-BORDER;
-		window.draw(sf::RectangleShape(sf::Vector2f(size, size)));
-
-		sf::RectangleShape shape = sf::RectangleShape(sf::Vector2f(size, size));
-		shape.setPosition(sf::Vector2f(size+BORDER, 0));
-		window.draw(shape);
-
-		#ifdef BROWN
-		for (int i = 0; i < N; ++i) {
-			array[i]->moveRandom();
-		}
-		#else
-		for (int i = 0; i < N; ++i) {
-			array[i]->moveLinear();
-		}
-		#endif
-
-		window.display();
-	}
-
-	delete[] array;
-}
-
-int main2() {
-
-	run();
-
-	return 0;
-}
-*/
