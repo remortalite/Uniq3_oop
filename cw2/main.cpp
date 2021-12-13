@@ -5,261 +5,13 @@
 #include <random>
 #include <ctime>
 
-//#include "tFigure.hpp"
-
-enum class CreatureType { Hunter, Prey, Plant };
-
-class Creature {
-
-private:
-	int m_idxX;
-	int m_idxY;
-
-	sf::Color m_color = sf::Color::White;
-
-	float m_probability;
-
-	char* m_name;
-
-protected:
-
-	const int m_period = 6;
-	int m_phase = 0;
-
-public:
-	
-	virtual CreatureType getType() {
-	}
-
-	Creature(int x, int y) 
-		: m_idxX(x), m_idxY(y) 
-	{
-	}
-
-	void setX(int newX) {
-		m_idxX = newX;
-	}
-
-	int getX() {
-		return m_idxX;	
-	}
-	
-	void setY(int newY) {
-		m_idxY = newY;
-	}
-
-	int getY() {
-		return m_idxY;	
-	}
-
-	void setPosition(int newX, int newY) {
-		m_idxX = newX;
-		m_idxY = newY;
-	}
-
-	void setColor(sf::Color color) {
-		m_color = color;
-	}
-
-	virtual sf::Color getColor() {
-		return m_color;
-	}
-
-	virtual float getProb() {
-		return m_probability;
-	}
-
-	void setProb(float prob) {
-		m_probability = prob;
-	}
-
-	virtual void step() {
-		stepPhase();
-	};
-
-	int getPeriod() {
-		return m_period;
-	}
-
-	int getPhase() {
-		return m_phase;
-	}
-
-	void stepPhase() {
-		++m_phase;
-		if (m_phase == m_period)
-			m_phase = 0;
-	}
-
-	virtual int isDead() {
-		return 0;
-	}
-
-	virtual int getSpeed() {
-		return 1;
-	}
-
-	virtual char* getTypeName() {
-		return "???";
-	}
-
-};
-
-class Plant : public Creature
-{
-
-	int m_lifetime = 6;
-
-public:
-
-	virtual CreatureType getType() {
-		return CreatureType::Plant;
-	}
-
-	virtual char* getTypeName() {
-		return "Plant";
-	}
-
-	Plant(int x, int y)
-		: Creature(x, y)
-	{
-		setColor(sf::Color::Green);
-		setProb(0.6f);
-	}
-
-	int getLifetime() {
-		return m_lifetime;
-	}
-
-	virtual void step()
-	{
-		Creature::step();
-		--m_lifetime;
-	}
-
-	virtual int isDead() {
-		if (m_lifetime <= 0)
-			return 1;
-		return 0;
-	}
-
-	virtual int getSpeed() {
-		return 0;
-	}
-
-};
-
-class LivingCreature : public Creature
-{
-
-public:
-
-	int m_hunger = 15;
-	int m_eaten = 0;
-	const int m_hungerStep = -2;
-	const int m_gaveBirthStep = -4;
-	const int m_eatStep = 2;
-
-	uint8_t delta = 20;
-
-	LivingCreature(int x, int y)
-		: Creature(x, y)
-	{
-	}
-
-	virtual void step() {
-		Creature::step();
-
-		m_hunger += m_hungerStep;
-		sf::Color color = getColor();
-		if (color.a-delta >= delta)
-			setColor(sf::Color(color.r, color.g, color.b, color.a-delta));
-	};
-
-	virtual int isDead() {
-		if (m_hunger <= 0)
-			return 1;
-		return 0;
-	}
-
-	void eat() {
-		m_hunger += m_eatStep;
-		++m_eaten;
-		
-		sf::Color color = getColor();
-		if (color.a+delta >= 254)
-			setColor(sf::Color(color.r, color.g, color.b, color.a+delta));
-	}
-
-	void giveBirth() {
-		m_hunger += m_gaveBirthStep;
-	}
-
-	int getCountEaten() {
-		return m_eaten;
-	}
-
-	void makeMovement(int newX, int newY) {
-		//m_hunger += m_hungerStep;
-
-		setPosition(newX, newY);
-	}
-
-};
-
-class Prey : public LivingCreature
-{
-
-public:
-
-	virtual CreatureType getType() {
-		return CreatureType::Prey;
-	}
-
-	virtual char* getTypeName() {
-		return "Prey";
-	}
-
-	Prey(int x, int y)
-		: LivingCreature(x, y)
-	{
-		setColor(sf::Color::Yellow);
-		setProb(0.4f);
-	}
-
-	virtual int getSpeed() {
-		return 1;
-	}
-
-};
-
-class Hunter : public LivingCreature
-{
-
-public:
-
-	virtual CreatureType getType() {
-		return CreatureType::Hunter;
-	}
-
-	virtual char* getTypeName() {
-		return "Hunter";
-	}
-
-	Hunter(int x, int y)
-		: LivingCreature(x, y)
-	{
-		setColor(sf::Color::Red);
-		setProb(0.1f);
-	}
-
-	virtual int getSpeed() {
-		if (m_hunger <= 5)
-			return 2;
-		return 1;
-	}
-};
-
+#include "Creature.hpp"
+#include "Plant.hpp"
+#include "LivingCreature.hpp"
+#include "Prey.hpp"
+#include "Hunter.hpp"
+#include "Game.hpp"
+/*
 class Game
 {
 
@@ -296,6 +48,7 @@ class Game
 		CreatureInt_Plant = 3
 	} CreatureInt;
 
+	///////////////////////////////////////////////
 	void fillProbArray() {
 		int coef = 100;
 
@@ -531,7 +284,7 @@ public:
 						} else {
 							if (nextCell && nextCell->getType() == CreatureType::Plant) {
 								Prey* creature = (Prey*)m_board[i][j];
-								creature->makeMovement(i+dx, j+dy);
+								//creature->makeMovement(i+dx, j+dy);
 								creature->eat();
 								--m_countCreatures;
 								m_board[i+dx][j+dy] = m_board[i][j];
@@ -563,7 +316,7 @@ public:
 								m_board[i+dx][j+dy] = nullptr;
 								--m_countCreatures;
 								m_board[i+dx][j+dy] = m_board[i][j];
-								creature->makeMovement(i+dx, j+dy);
+								//creature->makeMovement(i+dx, j+dy);
 								if (isChild) {
 									Creature* child = getCreature(CreatureType::Hunter);
 									if (child != nullptr) {
@@ -628,7 +381,8 @@ public:
 				}
 			}
 
-					lifeStep();
+			lifeStep();
+			
 			// update inside-class coordinates
 			for (int i = 0; i < m_Nrow; ++i)
 				for (int j = 0; j < m_Nrow; ++j)
@@ -650,7 +404,7 @@ public:
 		}
 	}
 };
-
+*/
 int main() {
 	srand(time(0));
 
