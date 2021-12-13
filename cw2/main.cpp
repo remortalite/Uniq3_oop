@@ -15,9 +15,11 @@ private:
 	int m_idxX;
 	int m_idxY;
 
-	sf::Color m_color;
+	sf::Color m_color = sf::Color::White;
 
 	float m_probability;
+
+	char* m_name;
 
 protected:
 
@@ -97,6 +99,10 @@ public:
 		return 1;
 	}
 
+	virtual char* getTypeName() {
+		return "???";
+	}
+
 };
 
 class Plant : public Creature
@@ -108,6 +114,10 @@ public:
 
 	virtual CreatureType getType() {
 		return CreatureType::Plant;
+	}
+
+	virtual char* getTypeName() {
+		return "Plant";
 	}
 
 	Plant(int x, int y)
@@ -128,7 +138,7 @@ public:
 	}
 
 	virtual int isDead() {
-		if (m_lifetime == 0)
+		if (m_lifetime <= 0)
 			return 1;
 		return 0;
 	}
@@ -139,31 +149,18 @@ public:
 
 };
 
-uint8_t diffColor = 20;
-
-uint8_t incColor(uint8_t color, uint8_t delta) {
-	if (color + delta > 255-delta)
-		return color;
-	return color+delta;
-}
-
-uint8_t decColor(uint8_t color, uint8_t delta) {
-	if (color - delta < delta)
-		return color;
-	return color+delta;
-}
-
 class LivingCreature : public Creature
 {
 
 public:
 
 	int m_hunger = 15;
+	int m_eaten = 0;
 	const int m_hungerStep = -2;
 	const int m_gaveBirthStep = -4;
 	const int m_eatStep = 2;
 
-	uint8_t delta = 10;
+	uint8_t delta = 20;
 
 	LivingCreature(int x, int y)
 		: Creature(x, y)
@@ -173,8 +170,8 @@ public:
 	virtual void step() {
 		Creature::step();
 
+		m_hunger += m_hungerStep;
 		sf::Color color = getColor();
-		std::cout << "stepColor: " << (int)color.r << ", " << (int)color.b << ", " << (int)color.g << std::endl;
 		if (color.a-delta >= delta)
 			setColor(sf::Color(color.r, color.g, color.b, color.a-delta));
 	};
@@ -195,19 +192,19 @@ public:
 	}
 
 	void giveBirth() {
-		hunger += m_gaveBirthStep;
-	}
-
-	void makeMovement(int newX, int newY) {
-		if ((newX - getX() != 0) || (newY - getY != 0))
-			m_hunger += m_hungerStep;
-
-		setPosition(newX, newY);
+		m_hunger += m_gaveBirthStep;
 	}
 
 	int getCountEaten() {
 		return m_eaten;
 	}
+
+	void makeMovement(int newX, int newY) {
+		//m_hunger += m_hungerStep;
+
+		setPosition(newX, newY);
+	}
+
 };
 
 class Prey : public LivingCreature
@@ -217,6 +214,10 @@ public:
 
 	virtual CreatureType getType() {
 		return CreatureType::Prey;
+	}
+
+	virtual char* getTypeName() {
+		return "Prey";
 	}
 
 	Prey(int x, int y)
@@ -239,6 +240,10 @@ public:
 
 	virtual CreatureType getType() {
 		return CreatureType::Hunter;
+	}
+
+	virtual char* getTypeName() {
+		return "Hunter";
 	}
 
 	Hunter(int x, int y)
@@ -273,7 +278,7 @@ class Game
 
 	typedef Creature** CreatureArray;
 
-	int m_sizeArrayCreatures = 100;
+	int m_sizeArrayCreatures = 10;
 	int m_countCreatures = 0;
 
 	CreatureArray* m_board;
@@ -384,7 +389,6 @@ public:
 		return 1;
 	}
 
-
 	Creature* getCreature(CreatureType type, int onSide = 0) {
 		int randX, randY;
 		if (m_countCreatures+1 > m_Nrow*m_Nrow || isBoardFull() == 1) {
@@ -396,14 +400,21 @@ public:
 				return nullptr;
 			}
 		}
+		int counter = 0;
 		do {
 			randX = rand() % m_Nrow;
 			randY = rand() % m_Nrow;
 			if (onSide) {
 				int onSideCoef = rand() % 2;
+				int onSideCoef9 = rand() % 2;
 				randX *= onSideCoef;
 				randY *= !onSideCoef;
+				randX += randX ? 0 : 
+					onSideCoef9 ? m_Nrow-1 : 0;
+				randY += randY ? 0 : 
+					onSideCoef9 ? m_Nrow-1 : 0;
 			}
+			++counter;
 		} while (isIndexAvailable(randX, randY) == 0);
 
 		switch(type) {
@@ -438,7 +449,43 @@ public:
 		}
 	}
 
+	void updateEnvironment() {
+	
+
+				if (m_steps % 5 == 0)
+					for (int i = 0; i < 15; ++i) {
+						Creature* creature = getCreature(CreatureType::Plant);
+						if (creature == nullptr) break;
+						m_board[creature->getX()][creature->getY()] = creature;
+						++m_countCreatures;
+					}
+
+				if (countHunters() < 5) {
+					for (int i = 0; i < 5; ++i) {
+						Creature* creature = getCreature(CreatureType::Hunter, 1);
+						if (creature == nullptr) break;
+						else m_board[creature->getX()][creature->getY()] = creature;
+						++m_countCreatures;
+					}
+				}
+
+			
+				if (countPreys() < 3) {
+					for (int i = 0; i < 2; ++i) {
+						Creature* creature = getCreature(CreatureType::Prey, 1);
+						if (creature == nullptr) break;
+						else m_board[creature->getX()][creature->getY()] = creature;
+						++m_countCreatures;
+					}
+	
+				}
+
+	}
+
 	void lifeStep() {
+
+		++m_steps;
+		
 		int dx, dy;
 		for (int i = 0; i < m_Nrow; ++i) {
 			for (int j = 0; j < m_Nrow; ++j) {
@@ -471,20 +518,32 @@ public:
 						isChild = rand() % 100 < 25 ? 1 : 0;
 						if (nextCell == nullptr) {
 							m_board[i+dx][j+dy] = m_board[i][j];
-							m_board[i][j] = isChild ? getCreature(CreatureType::Prey) : nullptr;
+							
+							if (isChild) {
+								Creature* child = getCreature(CreatureType::Prey);
+								if (child) {
+									m_board[i][j] = child;
+									++m_countCreatures;
+								} else
+									m_board[i][j] = nullptr;
+							} else
+								m_board[i][j] = nullptr;
 						} else {
 							if (nextCell && nextCell->getType() == CreatureType::Plant) {
-								m_board[i][j]->setPosition(i+dx,j+dy);
 								Prey* creature = (Prey*)m_board[i][j];
+								creature->makeMovement(i+dx, j+dy);
 								creature->eat();
 								--m_countCreatures;
 								m_board[i+dx][j+dy] = m_board[i][j];
 								if (isChild) {
 									Creature* child = getCreature(CreatureType::Prey);
 									if (child) {
+										child->setPosition(i,j);
 										m_board[i][j] = child;
 										++m_countCreatures;
-									}
+										creature->giveBirth();
+									} else
+										m_board[i][j] = nullptr;
 								} else {
 									m_board[i][j] = nullptr;
 								}
@@ -497,12 +556,27 @@ public:
 							m_board[i][j] = nullptr;
 						} else {
 							if (nextCell && nextCell->getType() == CreatureType::Prey) {
-								m_board[i][j]->setPosition(i+dx,j+dy);
 								Hunter* creature = (Hunter*)m_board[i][j];
 								creature->eat();
+								if (creature->getCountEaten() == 2)
+									isChild = rand() % 100 < 25 ? 1 : 0;
+								m_board[i+dx][j+dy] = nullptr;
 								--m_countCreatures;
 								m_board[i+dx][j+dy] = m_board[i][j];
-								m_board[i][j] = nullptr;
+								creature->makeMovement(i+dx, j+dy);
+								if (isChild) {
+									Creature* child = getCreature(CreatureType::Hunter);
+									if (child != nullptr) {
+										child->setPosition(i,j);
+										m_board[i][j] = child;
+										++m_countCreatures;
+										creature->giveBirth();
+									} else {
+										m_board[i][j] = nullptr;
+									}
+								} else {
+									m_board[i][j] = nullptr;
+								}
 							}
 						}
 						break;
@@ -513,6 +587,14 @@ public:
 				
 			}
 		}
+
+		// update in-class positions
+		for (int i = 0; i < m_Nrow; ++i)
+			for (int j = 0; j < m_Nrow; ++j)
+				if (m_board[i][j] != nullptr)
+					m_board[i][j]->setPosition(i,j);
+
+		updateEnvironment();
 	}
 
 	int countHunters() {
@@ -543,56 +625,30 @@ public:
 				else if (event.type == sf::Event::KeyPressed &&
 						sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
 					lifeStep();
-					++m_steps;
-
-					if (m_steps % 5 == 0)
-						for (int i = 0; i < 15; ++i) {
-							Creature* creature = getCreature(CreatureType::Plant);
-							if (creature == nullptr) break;
-							m_board[creature->getX()][creature->getY()] = creature;
-							++m_countCreatures;
-						}
-
-					if (countHunters() < 5) {
-						for (int i = 0; i < 5; ++i) {
-							Creature* creature = getCreature(CreatureType::Hunter, 1);
-							if (creature == nullptr) break;
-							else m_board[creature->getX()][creature->getY()] = creature;
-							++m_countCreatures;
-						}
-					}
-
-				
-					if (countPreys() < 2) {
-						for (int i = 0; i < 2; ++i) {
-							Creature* creature = getCreature(CreatureType::Prey, 1);
-							if (creature == nullptr) break;
-							else m_board[creature->getX()][creature->getY()] = creature;
-							++m_countCreatures;
-						}
-		
-					}
 				}
 			}
 
-			//std::cout << "Side: " << isSideIndexAvailable() << std::endl;
+					lifeStep();
+			// update inside-class coordinates
+			for (int i = 0; i < m_Nrow; ++i)
+				for (int j = 0; j < m_Nrow; ++j)
+					if (m_board[i][j] != nullptr)
+						m_board[i][j]->setPosition(i,j);
+
 			m_window.clear(sf::Color::Black);
 
 			for (int i = 0; i < m_Nrow; ++i) {
 				for (int j = 0; j < m_Nrow; ++j) {
 					Creature* creature = m_board[i][j];
-					if (!creature) continue;
+					if (creature == nullptr) continue;
 					m_window.draw(createShape(m_board[i][j]));	
 				}
 			}
 
-
 			m_window.display();
-
 
 		}
 	}
-
 };
 
 int main() {
