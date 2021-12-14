@@ -174,8 +174,8 @@ void Game::initializeArray()
 
 void Game::updateEnvironment()
 {
-    if (m_steps % (rand()%6+1) == 0)
-        for (int i = 0; i < m_Nrow*3; ++i) {
+    if (m_steps % (rand() % 6 + 1) == 0)
+        for (int i = 0; i < m_Nrow * 3; ++i) {
             Creature* creature = getCreature(CreatureType::Plant);
             if (creature == nullptr)
                 break;
@@ -183,8 +183,8 @@ void Game::updateEnvironment()
             ++m_countCreatures;
         }
 
-    if (countHunters() < m_Nrow/2) {
-        for (int i = 0; i < m_Nrow/2; ++i) {
+    if (countHunters() < m_Nrow / 2) {
+        for (int i = 0; i < m_Nrow / 2; ++i) {
             Creature* creature = getCreature(CreatureType::Hunter, 1);
             if (creature == nullptr)
                 break;
@@ -194,8 +194,8 @@ void Game::updateEnvironment()
         }
     }
 
-    if (countPreys() < m_Nrow/2) {
-        for (int i = 0; i < m_Nrow/2; ++i) {
+    if (countPreys() < m_Nrow / 2) {
+        for (int i = 0; i < m_Nrow / 2; ++i) {
             Creature* creature = getCreature(CreatureType::Prey, 1);
             if (creature == nullptr)
                 break;

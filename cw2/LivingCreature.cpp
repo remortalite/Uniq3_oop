@@ -42,5 +42,5 @@ int LivingCreature::getCountEaten()
 
 void LivingCreature::setInitialHunger(int hunger)
 {
-	m_hunger = hunger;
+    m_hunger = hunger;
 }
