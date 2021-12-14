@@ -3,7 +3,8 @@
 Hunter::Hunter(int x, int y) : LivingCreature(x, y)
 {
     setColor(sf::Color::Red);
-    setProb(0.1f);
+    setInitialHunger(70);
+    setProb(0.2f);
 }
 
 CreatureType Hunter::getType()

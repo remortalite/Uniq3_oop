@@ -1,0 +1,179 @@
+\documentclass[fleqn]{article}
+
+\usepackage{cmap}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+
+\usepackage[14pt]{extsizes}
+\usepackage[left=20mm, top=15mm, right=15mm, bottom=15mm, nohead, footskip=10mm]{geometry}
+
+\usepackage{listings}
+\usepackage{verbatim}
+\usepackage{titlesec}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage[colorlinks=true,linkcolor=black,anchorcolor=black,citecolor=black,filecolor=black,menucolor=black,runcolor=black,urlcolor=black]{hyperref}
+
+\usepackage{courier}
+
+\usepackage{amsmath,amsfonts,amssymb,amsthm,mathtools}
+
+\begin{document}
+\begin{titlepage}
+\newpage
+\begin{center}
+Министерство цифрового развития, связи и массовых коммуникаций Российской Федерации\\
+ФГБОУ высшего образования \\
+"Сибирский Государственный Университет Телекоммуникаций и Информатики" (СибГУТИ)
+
+Кафедра прикладной математики и кибернетики
+\end{center}
+\vspace{9em}
+\begin{center}
+Курсовая работа \\
+по дисциплине <<Объектно-ориентированное программирование>>
+\end{center}
+
+\begin{center}
+Тема: Игра <<Жизнь>>
+\end{center}
+
+\vspace{15em}
+
+\begin{center}
+\hfillВыполнил: студент 2 курса группы ИП-012 \\
+\hfillМаланов Роман Игоревич \\
+\hfillПроверил: доцент кафедры ПМиК \\ 
+\hfillСитняковская Е.И.
+\end{center}
+
+\vspace{3em}
+
+\vfill
+
+\begin{center}
+Новосибирск, 2021
+\end{center}
+\end{titlepage}
+
+\definecolor{gray}{rgb}{0.3, 0.4, 0.4}
+
+\lstset{
+  language=C++,
+  numbers=left,                   % where to put the line-numbers
+  stepnumber=1,                   % the step between two line-numbers.
+  numbersep=15pt,                  % how far the line-numbers are from the code
+  backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+  showspaces=false,               % show spaces adding particular underscores
+  tabsize=2,                      % sets default tabsize to 2 spaces
+  breaklines=true,                % sets automatic line breaking
+  breakatwhitespace=true,         % sets if automatic breaks should only happen at whitespace
+  extendedchars=\true,
+  inputencoding=utf8,
+  basicstyle=\sffamily\footnotesize,
+  commentstyle=\fontseries{lc}\selectfont\itshape\color{gray},
+  keywordstyle=\color{blue},
+  stringstyle=\ttfamily\color{red},
+}
+
+\tableofcontents
+
+\newpage
+
+\section{Введение}
+
+\subsection{Задача:}
+
+Написать программу для игры в "Жизнь".
+
+\subsection{Описание игры:}
+
+
+
+\section{Описание используемых алгоритмов и функций}
+
+Программа написана на языке Си под платформу Linux с использованием ncurses, 
+библиотеки для управления вводом-выводом в терминал.
+
+Программа создаёт в терминале 16 клеток (фишек), заполненных цифрами от 1 до 15
+и одной пустой. Управление фишками происходит с помощью мыши.
+Нажатие на фишку сдвигает её, если рядом с ней есть пустая клетка.
+
+\begin{itemize}
+		\item В функции \verb|main.c| происходит создание всех блоков,
+				настройка параметров и отслеживание нажатий клафиш и мыши.
+
+		\item Текущий порядок фишек хранится в массиве \verb+numbers+.
+
+		\item Для хранения фишек, их координат и содержащихся в них чисел
+				используется структура \verb|struct _cell|, определённая как тип
+				\verb+Cell+.
+
+		\item Функция \verb+randomize()+ перемешивает числа в массиве
+				\verb+numbers+. Для перемешивания фишек используется
+				клавиша \verb+`r`+, перемешивание происходит до тех пор,
+				пока не получаем разрешимую кобинацию (ровно половина
+				возможных комбинаций неразрешима). Проверку на разрешимость \
+				текущего порядка фишек осуществляет функция \verb+is_solvable()+
+				(проверяет чётность текущего порядка фишек, см. 
+
+				\href{https://ru.wikipedia.org/wiki/%D0%98%D0%B3%D1%80%D0%B0_%D0%B2_15#%D0%9C%D0%B0%D1%82%D0%B5%D0%BC%D0%B0%D1%82%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%BE%D0%B5_%D0%BE%D0%BF%D0%B8%D1%81%D0%B0%D0%BD%D0%B8%D0%B5}{Пятнашки:Математическое описание}).
+
+		\item Функции \verb|get_coord()| и \verb|get_cell_idx()| взаимно обратны
+				и используются для получения координат фишки по индексам
+				и для получения индекса по известным координатам соответственно.
+
+		\item Функция \verb|get_motion()| проверяет, есть ли рядом с данной
+				фишкой свободная клетка. Возвращает тип \verb|Motion|, 
+				направление, в котором можно сместить фишку.
+
+		\item Функция \verb|make_movement| смещает фишку на пустую клетку
+				(меняет местами числа в массиве \verb|numbers|).
+
+		\item Функция \verb|check_win()| проверяет, получил ли игрок
+				правильное положение фишек (проверяет возрастание чисел
+				в массиве \verb|numbers| и положение пустой клетки).
+				Проверка происходит только когда фишка с цифрой '1' 
+				находится в левом верхнем углу, а пустая клетка в правом нижнем.
+
+\end{itemize}
+
+\newpage
+
+\section{Код программы}
+
+\subsection{Листинг:}
+
+language: C++
+\lstinputlisting[title=Creature.hpp]{Creature.hpp}
+\lstinputlisting[title=Plant.hpp]{Plant.hpp}
+\lstinputlisting[title=LivingCreature.hpp]{LivingCreature.hpp}
+\lstinputlisting[title=Prey.hpp]{Prey.hpp}
+\lstinputlisting[title=Hunter.hpp]{Hunter.hpp}
+\lstinputlisting[title=Game.hpp]{Game.hpp}
+
+Source-файлы:
+\lstinputlisting[title=Creature.cpp]{Creature.cpp}
+\lstinputlisting[title=Plant.cpp]{Plant.cpp}
+\lstinputlisting[title=LivingCreature.cpp]{LivingCreature.cpp}
+\lstinputlisting[title=Prey.cpp]{Prey.cpp}
+\lstinputlisting[title=Hunter.cpp]{Hunter.cpp}
+\lstinputlisting[title=Game.cpp]{Game.cpp}
+
+\subsection{Скриншоты с примером работы:}
+
+%\begin{figure}[h!]
+%		\includegraphics[width=0.5\textwidth]{screenshot.jpg}
+%		\caption{Состояние при запуске}
+%\end{figure}
+%\begin{figure}[h!]
+%		\includegraphics[width=0.5\textwidth]{screenshot2.jpg}
+%		\caption{Перемешивание фишек}
+%\end{figure}
+%\begin{figure}[h!]
+%\includegraphics[width=0.5\textwidth]{screenshot3.jpg}
+%		\caption{Собранная головоломка}
+%\end{figure}
+
+\end{document}

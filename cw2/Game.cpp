@@ -174,8 +174,8 @@ void Game::initializeArray()
 
 void Game::updateEnvironment()
 {
-    if (m_steps % 5 == 0)
-        for (int i = 0; i < 15; ++i) {
+    if (m_steps % (rand()%6+1) == 0)
+        for (int i = 0; i < m_Nrow*3; ++i) {
             Creature* creature = getCreature(CreatureType::Plant);
             if (creature == nullptr)
                 break;
@@ -183,8 +183,8 @@ void Game::updateEnvironment()
             ++m_countCreatures;
         }
 
-    if (countHunters() < 5) {
-        for (int i = 0; i < 5; ++i) {
+    if (countHunters() < m_Nrow/2) {
+        for (int i = 0; i < m_Nrow/2; ++i) {
             Creature* creature = getCreature(CreatureType::Hunter, 1);
             if (creature == nullptr)
                 break;
@@ -194,8 +194,8 @@ void Game::updateEnvironment()
         }
     }
 
-    if (countPreys() < 3) {
-        for (int i = 0; i < 2; ++i) {
+    if (countPreys() < m_Nrow/2) {
+        for (int i = 0; i < m_Nrow/2; ++i) {
             Creature* creature = getCreature(CreatureType::Prey, 1);
             if (creature == nullptr)
                 break;
@@ -242,7 +242,7 @@ void Game::lifeStep()
             case CreatureType::Plant:
                 break;
             case CreatureType::Prey:
-                isChild = rand() % 100 < 25 ? 1 : 0;
+                isChild = rand() % 100 < 35 ? 1 : 0;
                 if (nextCell == nullptr) {
                     m_board[i + dx][j + dy] = m_board[i][j];
 
@@ -285,8 +285,8 @@ void Game::lifeStep()
                     if (nextCell && nextCell->getType() == CreatureType::Prey) {
                         Hunter* creature = (Hunter*)m_board[i][j];
                         creature->eat();
-                        if (creature->getCountEaten() == 2)
-                            isChild = rand() % 100 < 25 ? 1 : 0;
+                        if (creature->getCountEaten() >= 2)
+                            isChild = rand() % 25 < 100 ? 1 : 0;
                         m_board[i + dx][j + dy] = nullptr;
                         --m_countCreatures;
                         m_board[i + dx][j + dy] = m_board[i][j];
@@ -313,14 +313,13 @@ void Game::lifeStep()
         }
     }
 
-            // update in-class positions
-        for (int i = 0; i < m_Nrow; ++i)
-            for (int j = 0; j < m_Nrow; ++j)
-                if (m_board[i][j] != nullptr)
-                    m_board[i][j]->setPosition(i, j);
+    // update in-class positions
+    for (int i = 0; i < m_Nrow; ++i)
+        for (int j = 0; j < m_Nrow; ++j)
+            if (m_board[i][j] != nullptr)
+                m_board[i][j]->setPosition(i, j);
 
-        updateEnvironment();
-
+    updateEnvironment();
 }
 
 int Game::countHunters()
@@ -346,6 +345,7 @@ int Game::countPreys()
 
 void Game::run()
 {
+    time_t startTime = time(0);
     while (m_window.isOpen()) {
         sf::Event event;
         while (m_window.pollEvent(event)) {
@@ -359,7 +359,10 @@ void Game::run()
             }
         }
 
-        //lifeStep();
+        if (time(0) - startTime == 1) {
+            lifeStep();
+            startTime = time(0);
+        }
 
         // update inside-class coordinates
         for (int i = 0; i < m_Nrow; ++i)

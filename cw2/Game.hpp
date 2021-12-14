@@ -20,7 +20,7 @@ class Game {
 
     sf::RenderWindow m_window;
 
-    int m_Nrow = 10; // square count per column or row
+    int m_Nrow = 150; // square count per column or row
 
     int m_borderSize = 2;
 
@@ -28,7 +28,7 @@ class Game {
 
     typedef Creature** CreatureArray;
 
-    int m_sizeArrayCreatures = 20;
+    int m_sizeArrayCreatures = m_Nrow;
     int m_countCreatures = 0;
 
     CreatureArray* m_board;

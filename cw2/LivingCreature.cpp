@@ -39,3 +39,8 @@ int LivingCreature::getCountEaten()
 {
     return m_eaten;
 }
+
+void LivingCreature::setInitialHunger(int hunger)
+{
+	m_hunger = hunger;
+}

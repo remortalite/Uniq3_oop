@@ -7,13 +7,13 @@
 
 class LivingCreature : public Creature {
 public:
-    int m_hunger = 15;
+    int m_hunger = 10;
     int m_eaten = 0;
     const int m_hungerStep = -2;
     const int m_gaveBirthStep = -4;
-    const int m_eatStep = 2;
+    const int m_eatStep = 3;
 
-    uint8_t delta = 20;
+    uint8_t delta = 10;
 
     LivingCreature(int x, int y);
 
@@ -26,6 +26,8 @@ public:
     void giveBirth();
 
     int getCountEaten();
+
+    void setInitialHunger(int);
 };
 
 #endif // #ifndef LIVINGCREATURE_HPP
