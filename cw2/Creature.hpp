@@ -13,8 +13,6 @@ class Creature {
 
     float m_probability;
 
-    char* m_name;
-
 public:
     Creature(int, int);
 

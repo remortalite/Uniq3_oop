@@ -7,11 +7,11 @@
 
 class LivingCreature : public Creature {
 public:
-    int m_hunger = 10;
+    int m_hunger = 11;
     int m_eaten = 0;
     const int m_hungerStep = -2;
     const int m_gaveBirthStep = -4;
-    const int m_eatStep = 3;
+    const int m_eatStep = 4;
 
     uint8_t delta = 10;
 

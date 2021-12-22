@@ -3,7 +3,7 @@
 Hunter::Hunter(int x, int y) : LivingCreature(x, y)
 {
     setColor(sf::Color::Red);
-    setInitialHunger(70);
+    setInitialHunger(36);
     setProb(0.2f);
 }
 
@@ -19,7 +19,7 @@ const char* Hunter::getTypeName()
 
 int Hunter::getSpeed()
 {
-    if (m_hunger <= 5)
+    if (m_hunger <= 18)
         return 2;
     return 1;
 }

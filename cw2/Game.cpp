@@ -286,7 +286,7 @@ void Game::lifeStep()
                         Hunter* creature = (Hunter*)m_board[i][j];
                         creature->eat();
                         if (creature->getCountEaten() >= 2)
-                            isChild = rand() % 25 < 100 ? 1 : 0;
+                            isChild = rand() % 100 < 25 ? 1 : 0;
                         m_board[i + dx][j + dy] = nullptr;
                         --m_countCreatures;
                         m_board[i + dx][j + dy] = m_board[i][j];

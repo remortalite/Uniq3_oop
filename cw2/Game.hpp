@@ -59,7 +59,7 @@ public:
 
     sf::Vector2f getCoord(int, int);
 
-    sf::RectangleShape createShape(Creature* creature);
+    sf::RectangleShape createShape(Creature*);
 
     int isIndexAvailable(int x, int y);
 
