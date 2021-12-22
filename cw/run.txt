@@ -1,1 +1,0 @@
-g++ -Wall -lsfml-graphics -lsfml-window -lsfml-system -DBROWN % && ./a.out
